@@ -1,26 +1,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "Shader.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-
-const char *vertexShaderSource = "#version 330 core\n"
-	"layout (location = 0) in vec3 aPos;\n"
-	"void main()\n"
-	"{\n"
-	"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-	 "}\0";
-
-const char* fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
 
 int main()
 {
@@ -37,7 +24,7 @@ int main()
 #endif
 
 	// glfw window creation
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Learn OpenGL", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(800, 600, "Learn OpenGL", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Faild to create GLFW window" << std::endl;
@@ -53,72 +40,53 @@ int main()
 		return -1;
 	}	
 
-	// build and compile shader programe
-	// vertex shader
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-	int success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::COMPILATION_FAILD\n" << infoLog << std::endl;
-	}
-	// fragment shader
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::COMPILATION_FAILD\n" << infoLog << std::endl;
-	}
-	// link shader
-	signed int shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "ERROR::PROGRAM::LINKING_FAILD\n" << infoLog << std::endl;
-	}
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	// 线框模式
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	// 默认模式
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	// build and compile shader programe
+	Shader ourShader("shaders/vert1.vs" ,"shaders/frag1.fs");
+
+	// 画一个三角形
 	float verties[] = {
-		0.5f, 0.5f, 0.0f,   // 右上角
-		0.5f, -0.5f, 0.0f,  // 右下角
-		-0.5f, -0.5f, 0.0f, // 左下角
-		-0.5f, 0.5f, 0.0f   // 左上角
+			// 位置              // 颜色
+		0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // 右下
+		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // 左下
+		0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
 	};
 	unsigned int indies[] = {
-		0,1,3,
-		1,2,3
+		0,1,2
 	};
-	unsigned int VBO, VAO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
 
+	// VBO(Vertex Buffer Obejct)绑定的流程如下A的顺序
+	// VAO(Vertex Array Object)绑定的流程如下B的顺序
+	unsigned int VBO, VAO, EBO;
+	// 创建顶点缓冲对象
+	glGenBuffers(1, &VBO);
+	// 创建索引缓冲对象
+	glGenBuffers(1, &EBO);
+	// 创建顶点数组对象
+	glGenVertexArrays(1, &VAO);
+	
+	// B0. 初始化代码（只运行一次 (除非你的物体频繁改变)）
+	// B1. 绑定VAO
 	glBindVertexArray(VAO);
+	// A0/B2.复制顶点数组到缓冲中供OpenGL使用
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verties), verties, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indies), indies, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	// A1/B3.设置顶点属性指针
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	// 绑定 VertexAttrib (Location 1): Color
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glBindVertexArray(0);
-
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -129,22 +97,36 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shaderProgram);
+		// A2.当我们渲染一个物体时要使用着色器程序
+		ourShader.use();
+
+		// 设置Shader的uniform值,uniform是Shader的全局变量
+		float timeValue = glfwGetTime();
+		float alphaValue = (sin(timeValue) / 2.0f) + 0.5f;
+		ourShader.setFloat("ourAlpha", alphaValue);
+		
+		// B4.绘制物体
 		glBindVertexArray(VAO);
-		// glDrawArrays(GL_TRIANGLES, 0, 6);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		// glBindVertexArray(0); // no need to unbind it every time 
+		// A3.绘制物体
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0); // no need to unbind it every time 
 		
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
+	// optional: de-allocate all resources once they've outlived their purpose:
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+
 	glfwTerminate();
 	return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
