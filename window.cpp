@@ -51,7 +51,7 @@ int main()
 
 	// 画一个矩形
 	float verties[] = {
-		// 位置				  // 颜色	          // 纹理坐标
+		// 位置				  // 颜色	          // 纹理坐标（左右反转）
 		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 1.0f, // 右上
 		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // 右下
 		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f, // 左下
@@ -176,6 +176,7 @@ int main()
 		float timeValue = glfwGetTime();
 		float alphaValue = (sin(timeValue) / 2.0f) + 0.5f;
 		ourShader.setFloat("ourAlpha", alphaValue);
+
 		// B4.绘制物体
 		glBindVertexArray(VAO);
 		// A3.绘制物体
