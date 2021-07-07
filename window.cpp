@@ -3,6 +3,9 @@
 #include <iostream>
 #include "Shader.h"
 #include "stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -170,10 +173,21 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
+		float timeValue = glfwGetTime();
+
+		glm::mat4 trans = glm::mat4(1.0f);
+		//绕Z轴旋转
+		trans = glm::rotate(trans, timeValue, glm::vec3(0.0, 0.0, 1.0));
+		//平移（0.5，0，0）
+		trans = glm::translate(trans, glm::vec3(0.5f, 0.0f, 0.0f));
+		//缩放为0.5
+		trans = glm::scale(trans, glm::vec3(1) * 0.5f);
+		ourShader.setMatrix4fv("transform1", glm::value_ptr(trans));
+
 		// A2.当我们渲染一个物体时要使用着色器程序
 		ourShader.use();
 		// 设置Shader的uniform值,uniform是Shader的全局变量
-		float timeValue = glfwGetTime();
+		
 		float alphaValue = (sin(timeValue) / 2.0f) + 0.5f;
 		ourShader.setFloat("ourAlpha", alphaValue);
 
