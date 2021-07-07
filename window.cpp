@@ -175,14 +175,21 @@ int main()
 
 		float timeValue = glfwGetTime();
 
-		glm::mat4 trans = glm::mat4(1.0f);
-		//绕Z轴旋转
-		trans = glm::rotate(trans, timeValue, glm::vec3(0.0, 0.0, 1.0));
-		//平移（0.5，0，0）
-		trans = glm::translate(trans, glm::vec3(0.5f, 0.0f, 0.0f));
-		//缩放为0.5
-		trans = glm::scale(trans, glm::vec3(1) * 0.5f);
-		ourShader.setMatrix4fv("transform1", glm::value_ptr(trans));
+		//glm::mat4 trans = glm::mat4(1.0f);
+		//trans = glm::rotate(trans, timeValue, glm::vec3(0.0, 0.0, 1.0));	// 绕Z轴旋转	
+		//trans = glm::translate(trans, glm::vec3(0.5f, 0.0f, 0.0f));		//平移（0.5，0，0）
+		//trans = glm::scale(trans, glm::vec3(1) * 0.5f);		//缩放为0.5
+		//ourShader.setMatrix4fv("transform1", glm::value_ptr(trans));
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::mat4 view = glm::mat4(1.0f);
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		glm::mat4 projection = glm::mat4(1.0f);
+		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
+		ourShader.setMatrix4fv("model", glm::value_ptr(model));
+		ourShader.setMatrix4fv("view", glm::value_ptr(view));
+		ourShader.setMatrix4fv("projection", glm::value_ptr(projection));
 
 		// A2.当我们渲染一个物体时要使用着色器程序
 		ourShader.use();
