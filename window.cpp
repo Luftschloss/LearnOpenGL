@@ -6,12 +6,25 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Camera.h"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+// timer
+float deltaTime = 0.0f; 
+float lastFrame = 0.0f; 
+
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+double lastX = SCR_WIDTH / 2.0f;
+double lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
 
 int main()
 {
@@ -35,9 +48,16 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// glad: load all OpenGL function pointers
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Faild to initialize GLAD" << std::endl;
@@ -231,20 +251,15 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
-		
-
 		// A2.当我们渲染一个物体时要使用着色器程序
 		ourShader.use();
 		// 设置Shader的uniform值,uniform是Shader的全局变量
 		float timeValue = (float)glfwGetTime();
-		
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 projection = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
+
+		glm::mat4 view = camera.GetViewMatrix();
 		ourShader.setMatrix4fv("view", glm::value_ptr(view));
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
 		ourShader.setMatrix4fv("projection", glm::value_ptr(projection));
-		
 
 		// B4.绘制物体
 		glBindVertexArray(VAO);
@@ -286,6 +301,38 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 void processInput(GLFWwindow *window)
 {
+	float curFrame = (float)glfwGetTime();
+	deltaTime = curFrame - lastFrame;
+	lastFrame = curFrame;
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+	float cameraSpeed = deltaTime * 2.5f;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+	double xoffset = xpos - lastX;
+	double yoffset = lastY - ypos; 
+	lastX = xpos;
+	lastY = ypos;
+	camera.ProcessMouseMovement((float)xoffset, (float)yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	camera.ProcessMouseScroll((float)yoffset);
 }
