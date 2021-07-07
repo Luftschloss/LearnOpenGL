@@ -52,20 +52,14 @@ int main()
 	// 画一个矩形
 	float verties[] = {
 		// 位置				  // 颜色	          // 纹理坐标
-		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // 右上
-		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // 右下
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // 左下
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // 左上 
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 1.0f, // 右上
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // 右下
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f, // 左下
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   1.0f, 1.0f  // 左上 
 	};
 	unsigned int indies[] = {
 		0, 1, 3,
 		1, 2, 3
-	};
-
-	float texCords[] = {
-		0.0f, 0.0f, //左下
-		1.0f, 0.0f,	//右下
-		0.5f, 1.0f	//上中
 	};
 
 	// VBO(Vertex Buffer Obejct)绑定的流程如下A的顺序
@@ -120,6 +114,7 @@ int main()
 
 	// T3:加载纹理数据
 	stbi_set_flip_vertically_on_load(true);	//图片的Y常在顶部，OpenGL是在底部，加载前需要flip_vertical
+	
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load("res/textures/container.jpg", &width, &height, &nrChannels, 0);
 	if (data)
