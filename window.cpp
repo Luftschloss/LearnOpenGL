@@ -48,9 +48,11 @@ int main()
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	// 默认模式
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	// 开启深度测试
+	glEnable(GL_DEPTH_TEST);
 
 	// build and compile shader programe
-	Shader ourShader("res/shaders/vert1.vs" ,"res/shaders/frag1.fs");
+	Shader ourShader("res/shaders/cubevert.vs" ,"res/shaders/cubefrag.fs");
 
 	// 画一个矩形
 	float verties[] = {
@@ -63,6 +65,63 @@ int main()
 	unsigned int indies[] = {
 		0, 1, 3,
 		1, 2, 3
+	};
+	// 立方体
+	float cubeVertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
 	// VBO(Vertex Buffer Obejct)绑定的流程如下A的顺序
@@ -80,19 +139,19 @@ int main()
 	glBindVertexArray(VAO);
 	// A0/B2.复制顶点数组到缓冲中供OpenGL使用
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verties), verties, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indies), indies, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indies), indies, GL_STATIC_DRAW);
 	// A1/B3.设置顶点属性指针
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// 绑定 VertexAttrib (Location 1): Color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	/*glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);*/
 	// 绑定 UV坐标
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	// T1:创建Texture对象
 	// Texture 1
@@ -152,10 +211,8 @@ int main()
 	// 释放纹理数据内存
 	stbi_image_free(data);
 
-	ourShader.use(); // don't forget to activate/use the shader before setting uniforms!
-	// either set it manually like so:
+	ourShader.use(); 
 	ourShader.setInt("texture1", 0);
-	// or set it via the texture class
 	ourShader.setInt("texture2", 1);
 
 	while (!glfwWindowShouldClose(window))
@@ -165,7 +222,8 @@ int main()
 
 		// render command
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		// Clear Color&Deepth Buffer
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// 在绑定纹理之前先激活纹理单元
 		glActiveTexture(GL_TEXTURE0);
@@ -173,36 +231,39 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
-		float timeValue = glfwGetTime();
-
-		//glm::mat4 trans = glm::mat4(1.0f);
-		//trans = glm::rotate(trans, timeValue, glm::vec3(0.0, 0.0, 1.0));	// 绕Z轴旋转	
-		//trans = glm::translate(trans, glm::vec3(0.5f, 0.0f, 0.0f));		//平移（0.5，0，0）
-		//trans = glm::scale(trans, glm::vec3(1) * 0.5f);		//缩放为0.5
-		//ourShader.setMatrix4fv("transform1", glm::value_ptr(trans));
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-		glm::mat4 projection = glm::mat4(1.0f);
-		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
-		ourShader.setMatrix4fv("model", glm::value_ptr(model));
-		ourShader.setMatrix4fv("view", glm::value_ptr(view));
-		ourShader.setMatrix4fv("projection", glm::value_ptr(projection));
+		
 
 		// A2.当我们渲染一个物体时要使用着色器程序
 		ourShader.use();
 		// 设置Shader的uniform值,uniform是Shader的全局变量
+		float timeValue = (float)glfwGetTime();
 		
-		float alphaValue = (sin(timeValue) / 2.0f) + 0.5f;
-		ourShader.setFloat("ourAlpha", alphaValue);
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 projection = glm::mat4(1.0f);
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
+		ourShader.setMatrix4fv("view", glm::value_ptr(view));
+		ourShader.setMatrix4fv("projection", glm::value_ptr(projection));
+		
 
 		// B4.绘制物体
 		glBindVertexArray(VAO);
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(0.5f, 1.0f, 0.4f));
+			ourShader.setMatrix4fv("model", glm::value_ptr(model));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+			float alphaValue = (sin(timeValue + i) / 2.0f) + 0.5f;
+			ourShader.setFloat("ourAlpha", alphaValue);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+		
 		// A3.绘制物体
 		// glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
