@@ -11,7 +11,8 @@
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow* window);
+void renderDemo01(GLFWwindow* window);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -26,68 +27,8 @@ double lastX = SCR_WIDTH / 2.0f;
 double lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
-int main()
-{
-	// glfw:initialize and configure
-	glfwInit();
-	// Set OpenGL Version: 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Set OpenGL Core
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-	// glfw window creation
-	GLFWwindow *window = glfwCreateWindow(800, 600, "Learn OpenGL", NULL, NULL);
-	if (window == NULL)
-	{
-		std::cout << "Faild to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
-
-	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-	// glad: load all OpenGL function pointers
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "Faild to initialize GLAD" << std::endl;
-		return -1;
-	}	
-
-	// 线框模式
-	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	// 默认模式
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	// 开启深度测试
-	glEnable(GL_DEPTH_TEST);
-
-	// build and compile shader programe
-	Shader ourShader("res/shaders/cubevert.vs" ,"res/shaders/cubefrag.fs");
-
-	// 画一个矩形
-	float verties[] = {
-		// 位置				  // 颜色	          // 纹理坐标（左右反转）
-		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 1.0f, // 右上
-		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // 右下
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f, // 左下
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   1.0f, 1.0f  // 左上 
-	};
-	unsigned int indies[] = {
-		0, 1, 3,
-		1, 2, 3
-	};
-	// 立方体
-	float cubeVertices[] = {
+// Cube
+float cubeVertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -129,7 +70,96 @@ int main()
 		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+};
+
+int main()
+{
+	// glfw:initialize and configure
+	glfwInit();
+	// Set OpenGL Version: 3.3
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	// Set OpenGL Core
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+	GLFWwindow *window = glfwCreateWindow(800, 600, "Learn OpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Faild to create GLFW window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glad: load all OpenGL function pointers
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Faild to initialize GLAD" << std::endl;
+		return -1;
+	}
+	
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	// 线框模式
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	// 默认模式
+	glEnable(GL_DEPTH_TEST);	// 开启深度测试
+	
+	renderDemo02(window);
+
+	glfwTerminate();
+	return 0;
+}
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow *window)
+{
+	float curFrame = (float)glfwGetTime();
+	deltaTime = curFrame - lastFrame;
+	lastFrame = curFrame;
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+	float cameraSpeed = deltaTime * 2.5f;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+}
+
+// 入门的RenderDemo，FPS Camera + Render Cude
+void renderDemo01(GLFWwindow* window)
+{
+	// build and compile shader programe
+	Shader ourShader("res/shaders/cubevert.vs", "res/shaders/cubefrag.fs");
+
+	// 画一个矩形
+	float verties[] = {
+		// 位置				  // 颜色	          // 纹理坐标（左右反转）
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 1.0f, // 右上
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // 右下
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f, // 左下
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   1.0f, 1.0f  // 左上 
 	};
+	unsigned int indies[] = {
+		0, 1, 3,
+		1, 2, 3
+	};
+	// 立方体
+	
 
 	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
@@ -153,7 +183,7 @@ int main()
 	glGenBuffers(1, &EBO);
 	// 创建顶点数组对象
 	glGenVertexArrays(1, &VAO);
-	
+
 	// B0. 初始化代码（只运行一次 (除非你的物体频繁改变)）
 	// B1. 绑定VAO
 	glBindVertexArray(VAO);
@@ -196,7 +226,7 @@ int main()
 
 	// T3:加载纹理数据
 	stbi_set_flip_vertically_on_load(true);	//图片的Y常在顶部，OpenGL是在底部，加载前需要flip_vertical
-	
+
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load("res/textures/container.jpg", &width, &height, &nrChannels, 0);
 	if (data)
@@ -231,7 +261,7 @@ int main()
 	// 释放纹理数据内存
 	stbi_image_free(data);
 
-	ourShader.use(); 
+	ourShader.use();
 	ourShader.setInt("texture1", 0);
 	ourShader.setInt("texture2", 1);
 
@@ -257,9 +287,9 @@ int main()
 		float timeValue = (float)glfwGetTime();
 
 		glm::mat4 view = camera.GetViewMatrix();
-		ourShader.setMatrix4fv("view", glm::value_ptr(view));
+		ourShader.setMat4("view", view);
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
-		ourShader.setMatrix4fv("projection", glm::value_ptr(projection));
+		ourShader.setMat4("projection", projection);
 
 		// B4.绘制物体
 		glBindVertexArray(VAO);
@@ -269,17 +299,17 @@ int main()
 			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(0.5f, 1.0f, 0.4f));
-			ourShader.setMatrix4fv("model", glm::value_ptr(model));
+			ourShader.setMat4("model", model);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 			float alphaValue = (sin(timeValue + i) / 2.0f) + 0.5f;
 			ourShader.setFloat("ourAlpha", alphaValue);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		
+
 		// A3.绘制物体
 		// glDrawArrays(GL_TRIANGLES, 0, 3);
 		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		
+
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -289,32 +319,89 @@ int main()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-
-	glfwTerminate();
-	return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+void renderDemo02(GLFWwindow* window)
 {
-	glViewport(0, 0, width, height);
-}
+	Shader lightShader("res/shaders/light1v.vs", "res/shaders/light1f.fs");
+	Shader lightCubeShader("res/shaders/cubevert.vs", "res/shaders/cubefrag.fs");
 
-void processInput(GLFWwindow *window)
-{
-	float curFrame = (float)glfwGetTime();
-	deltaTime = curFrame - lastFrame;
-	lastFrame = curFrame;
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-	float cameraSpeed = deltaTime * 2.5f;
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.ProcessKeyboard(FORWARD, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.ProcessKeyboard(BACKWARD, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.ProcessKeyboard(LEFT, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.ProcessKeyboard(RIGHT, deltaTime);
+	unsigned int VBO, cubeVAO;
+	glGenVertexArrays(1, &cubeVAO);
+	glGenBuffers(1, &VBO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
+
+	glBindVertexArray(cubeVAO);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	unsigned int lightCubeVAO;
+	glGenVertexArrays(1, &lightCubeVAO);
+	glBindVertexArray(lightCubeVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	while (!glfwWindowShouldClose(window))
+	{
+		// per-frame time logic
+		// --------------------
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		// input
+		// -----
+		processInput(window);
+
+		// render
+		// ------
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// be sure to activate shader when setting uniforms/drawing objects
+		lightShader.use();
+		lightShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+		lightShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+
+		// view/projection transformations
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		lightShader.setMat4("projection", projection);
+		lightShader.setMat4("view", view);
+
+		// world transformation
+		glm::mat4 model = glm::mat4(1.0f);
+		lightShader.setMat4("model", model);
+
+		// render the cube
+		glBindVertexArray(cubeVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+		// also draw the lamp object
+		lightCubeShader.use();
+		lightCubeShader.setMat4("projection", projection);
+		lightCubeShader.setMat4("view", view);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, lightPos);
+		model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+		lightCubeShader.setMat4("model", model);
+
+		glBindVertexArray(lightCubeVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+		// -------------------------------------------------------------------------------
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
