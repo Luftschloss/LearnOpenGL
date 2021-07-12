@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class Shader
 {
@@ -115,36 +117,35 @@ public:
 	{
 		glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
 	}
-	void setVec2(const std::string& name, glm::vec2 vec)
+	void setVec2(const std::string& name, glm::vec2 &vec)
 	{
-		glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(vec));
+		glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &vec[0]);
 	}
 	void setVec3(const std::string& name, float x, float y, float z)
 	{
 		glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
 	}
-	void setVec3(const std::string& name, glm::vec3 vec)
+	void setVec3(const std::string& name, glm::vec3 &vec)
 	{
-		glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(vec));
+		glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &vec[0]);
 	}
 	void setVec4(const std::string& name, float v0, float v1, float v2, float v3) const
 	{
 		glUniform4f(glGetUniformLocation(ID, name.c_str()), v0, v1, v2, v3);
 	}
-	void setVec4(const std::string& name, glm::vec4 vec) const
+	void setVec4(const std::string& name, glm::vec4 &vec) const
 	{
-		glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(vec));
+		glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &vec[0]);
 	}
-	void setMat2(const std::string& name, const glm::mat2& mat) const
+	void setMat2(const std::string& name, const glm::mat2 &mat) const
 	{
 		glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 	}
-	// ------------------------------------------------------------------------
-	void setMat3(const std::string& name, const glm::mat3& mat) const
+	void setMat3(const std::string& name, const glm::mat3 &mat) const
 	{
 		glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 	}
-	void setMat4(const std::string& name, const glm::mat3& mat) const
+	void setMat4(const std::string& name, const glm::mat4 &mat) const
 	{
 		glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 	}
